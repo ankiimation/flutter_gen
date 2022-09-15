@@ -327,7 +327,7 @@ String _directoryClassGenDefinition(
   List<_Statement> statements,
 ) {
   final statementsBlock = statements
-      .map((statement) => '  ${statement.toGetterString()}')
+      .map((statement) => ' ${statement.toGetterString()}')
       .join('\n');
   return '''
 class $className {
@@ -465,8 +465,38 @@ class _Statement {
   final String value;
   final bool isConstConstructor;
 
-  String toGetterString() =>
-      '$type get $name => ${isConstConstructor ? 'const' : ''} $value;';
+  String toGetterString() {
+    if (!valid) {
+      return '// $type get $name => ${isConstConstructor ? 'const' : ''} $value;';
+    } else {
+      return '$type get $name => ${isConstConstructor ? 'const' : ''} $value;';
+    }
+  }
 
-  String toStaticFieldString() => 'static const $type $name = $value;';
+  String toStaticFieldString() =>
+      '${valid ? '' : '// '}static const $type $name = $value;';
+
+  bool get valid =>
+      !type.startsWith(RegExp('[0-9]')) &&
+      !name.startsWith(RegExp('[0-9]')) &&
+      !keywords.contains(type) &&
+      !keywords.contains(name);
 }
+
+const keywords = '''
+abstract 	else	import 	show 
+as 	enum	in	static 
+assert	export 	interface 	super
+async 	extends	is	switch
+await 	extension 	late 	sync 
+break	external 	library 	this
+case	factory 	mixin 	throw
+catch	false	new	true
+class	final	null	try
+const	finally	on 	typedef 
+continue	for	operator 	var
+covariant 	Function 	part 	void
+default	get 	required 	while
+deferred 	hide 	rethrow	with
+do	if	return	yield 
+dynamic 	implements 	set ''';
