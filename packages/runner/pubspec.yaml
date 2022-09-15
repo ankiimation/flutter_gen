@@ -20,7 +20,7 @@ dependencies:
     git:
       url: https://github.com/ankiimation/flutter_gen.git
       path: packages/core
-      ref: ignore-invalid-asset-name-0.0.2
+      ref: ignore-invalid-asset-name-0.0.3
   build: ">=1.6.0 <3.0.0"
 
 dev_dependencies:
