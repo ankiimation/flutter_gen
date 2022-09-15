@@ -1,6 +1,7 @@
 name: test
 
 flutter_gen:
+  null_safety: false
   integrations:
     flutter_svg: true
   assets:
@@ -9,5 +10,4 @@ flutter_gen:
 flutter:
   assets:
     - assets/images/chip3/chip3.jpg
-    - assets/images/icons/dart@test.svg
     - assets/images/icons/fuchsia.svg

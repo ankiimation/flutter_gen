@@ -6,5 +6,6 @@ A sample project using FlutterGen.
 
 ```
 cd ../flutter_gen
-melos run pub:get
+make setup
+make build-runner
 ```

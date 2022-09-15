@@ -15,17 +15,16 @@ extension StringExt on String {
 }
 
 List<String> _intoWords(String path) {
-  const symbols = [
+  final _symbols = [
     ' ',
     '.',
     '/',
     '_',
     '\\',
     '-',
-    '@',
   ];
-  final upperAlphaRegex = RegExp(r'[A-Z]');
-  final lowerAlphaRegex = RegExp(r'[a-z]');
+  final _upperAlphaRegex = RegExp(r'[A-Z]');
+  final _lowerAlphaRegex = RegExp(r'[a-z]');
   final buffer = StringBuffer();
   final words = <String>[];
 
@@ -35,16 +34,16 @@ List<String> _intoWords(String path) {
         ? null
         : String.fromCharCode(path.codeUnitAt(i + 1));
 
-    if (symbols.contains(char)) {
+    if (_symbols.contains(char)) {
       continue;
     }
 
     buffer.write(char);
 
     final isEndOfWord = nextChar == null ||
-        (upperAlphaRegex.hasMatch(nextChar) &&
-            path.contains(lowerAlphaRegex)) ||
-        symbols.contains(nextChar);
+        (_upperAlphaRegex.hasMatch(nextChar) &&
+            path.contains(_lowerAlphaRegex)) ||
+        _symbols.contains(nextChar);
 
     if (isEndOfWord) {
       words.add(buffer.toString());

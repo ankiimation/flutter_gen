@@ -1,10 +1,8 @@
-include: package:flutter_lints/flutter.yaml
+include: package:effective_dart/analysis_options.yaml
 
 analyzer:
   exclude:
-    - 'example'
-    - '**/*.g.dart'
-    - 'test_resources/**'
+    - "lib/utils/dart_style/**"
 
 linter:
   rules:

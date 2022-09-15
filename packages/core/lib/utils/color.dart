@@ -1,11 +1,5 @@
 import 'package:color/color.dart';
 
-/// e.g. 0xBB1122 -> #BB1122
-String hexFromColor(String hexColor) {
-  return hexColor.replaceFirst('0x', '#').toUpperCase();
-}
-
-/// e.g. #BB1122 -> FFBB1122
 String colorFromHex(String hexColor) {
   hexColor = hexColor.toUpperCase().replaceFirst('#', '');
   if (hexColor.length == 6) {
@@ -105,11 +99,11 @@ Color _mix(
 ) {
   assert(amount >= 0 && amount <= 100);
   final p = amount / 100;
-  final c1 = color1.toRgbColor();
-  final c2 = color2.toRgbColor();
+  final _color1 = color1.toRgbColor();
+  final _color2 = color2.toRgbColor();
   return Color.rgb(
-    ((c2.r - c1.r) * p + c1.r).round(),
-    ((c2.g - c1.g) * p + c1.g).round(),
-    ((c2.b - c1.b) * p + c1.b).round(),
+    ((_color2.r - _color1.r) * p + _color1.r).round(),
+    ((_color2.g - _color1.g) * p + _color1.g).round(),
+    ((_color2.b - _color1.b) * p + _color1.b).round(),
   );
 }

@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import 'package:dart_style/dart_style.dart';
 import 'package:path/path.dart';
 
 import 'generators/assets_generator.dart';
 import 'generators/colors_generator.dart';
 import 'generators/fonts_generator.dart';
 import 'settings/config.dart';
+import 'utils/dart_style/dart_style.dart';
+import 'utils/error.dart';
 import 'utils/file.dart';
 
 class FlutterGenerator {
@@ -22,25 +23,21 @@ class FlutterGenerator {
   final String colorsName;
   final String fontsName;
 
-  Future<void> build({Config? config, FileWriter? writer}) async {
-    config ??= loadPubspecConfigOrNull(pubspecFile);
-    if (config == null) return;
-
-    final flutter = config.pubspec.flutter;
-    final flutterGen = config.pubspec.flutterGen;
-    final output = config.pubspec.flutterGen.output;
-    final lineLength = config.pubspec.flutterGen.lineLength;
-    final formatter = DartFormatter(pageWidth: lineLength, lineEnding: '\n');
-
-    void defaultWriter(String contents, String path) {
-      final file = File(path);
-      if (!file.existsSync()) {
-        file.createSync(recursive: true);
-      }
-      file.writeAsStringSync(contents);
+  Future<void> build() async {
+    Config config;
+    try {
+      config = await loadPubspecConfig(pubspecFile);
+    } on InvalidSettingsException catch (e) {
+      stderr.writeln(e.message);
+      return;
+    } on FileSystemException catch (e) {
+      stderr.writeln(e.message);
+      return;
     }
 
-    writer ??= defaultWriter;
+    final output = config.flutterGen.output;
+    final lineLength = config.flutterGen.lineLength;
+    final formatter = DartFormatter(pageWidth: lineLength, lineEnding: '\n');
 
     final absoluteOutput =
         Directory(normalize(join(pubspecFile.parent.path, output)));
@@ -48,35 +45,35 @@ class FlutterGenerator {
       absoluteOutput.createSync(recursive: true);
     }
 
-    if (flutterGen.colors.enabled && flutterGen.colors.inputs.isNotEmpty) {
+    if (config.flutterGen.colors.enabled &&
+        config.flutterGen.colors.inputs.isNotEmpty) {
       final generated =
-          generateColors(pubspecFile, formatter, flutterGen.colors);
-      final colorsPath =
-          normalize(join(pubspecFile.parent.path, output, colorsName));
-      writer(generated, colorsPath);
-      stdout.writeln('Generated: $colorsPath');
+          generateColors(pubspecFile, formatter, config.flutterGen.colors);
+      final colors =
+          File(normalize(join(pubspecFile.parent.path, output, colorsName)));
+      writeAsString(generated, file: colors);
+      print('Generated: ${colors.absolute.path}');
     }
 
-    if (flutterGen.assets.enabled && flutter.assets.isNotEmpty) {
+    if (config.flutterGen.assets.enabled && config.flutter.assets.isNotEmpty) {
       final generated = generateAssets(
         AssetsGenConfig.fromConfig(pubspecFile, config),
         formatter,
       );
-      final assetsPath =
-          normalize(join(pubspecFile.parent.path, output, assetsName));
-      writer(generated, assetsPath);
-      stdout.writeln('Generated: $assetsPath');
+      final assets =
+          File(normalize(join(pubspecFile.parent.path, output, assetsName)));
+      writeAsString(generated, file: assets);
+      print('Generated: ${assets.absolute.path}');
     }
 
-    if (flutterGen.fonts.enabled && flutter.fonts.isNotEmpty) {
-      final generated =
-          generateFonts(formatter, flutter.fonts, flutterGen.fonts);
-      final fontsPath =
-          normalize(join(pubspecFile.parent.path, output, fontsName));
-      writer(generated, fontsPath);
-      stdout.writeln('Generated: $fontsPath');
+    if (config.flutterGen.fonts.enabled && config.flutter.fonts.isNotEmpty) {
+      final generated = generateFonts(formatter, config.flutter.fonts);
+      final fonts =
+          File(normalize(join(pubspecFile.parent.path, output, fontsName)));
+      writeAsString(generated, file: fonts);
+      print('Generated: ${fonts.absolute.path}');
     }
 
-    stdout.writeln('FlutterGen finished.');
+    print('FlutterGen finished.');
   }
 }

@@ -7,11 +7,14 @@ String get header {
 ''';
 }
 
-String get ignore {
-  return '''// coverage:ignore-file
-// ignore_for_file: type=lint
-// ignore_for_file: directives_ordering,unnecessary_import
-  
+/// TODO: Until null safety generalizes
+String get headerWithNoNullSafety {
+  return '''// @dart = 2.10
+/// GENERATED CODE - DO NOT MODIFY BY HAND
+/// *****************************************************
+///  FlutterGen
+/// *****************************************************
+
 ''';
 }
 

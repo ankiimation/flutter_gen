@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dart_style/dart_style.dart';
 import 'package:dartx/dartx.dart';
 import 'package:path/path.dart';
 import 'package:xml/xml.dart';
@@ -8,6 +7,7 @@ import 'package:xml/xml.dart';
 import '../settings/color_path.dart';
 import '../settings/pubspec.dart';
 import '../utils/color.dart';
+import '../utils/dart_style/dart_style.dart';
 import '../utils/error.dart';
 import '../utils/string.dart';
 import 'generator_helper.dart';
@@ -15,26 +15,24 @@ import 'generator_helper.dart';
 String generateColors(
   File pubspecFile,
   DartFormatter formatter,
-  FlutterGenColors colorsConfig,
+  FlutterGenColors colors,
 ) {
-  if (colorsConfig.inputs.isEmpty) {
-    throw const InvalidSettingsException(
+  if (colors.inputs.isEmpty) {
+    throw InvalidSettingsException(
         'The value of "flutter_gen/colors:" is incorrect.');
   }
 
   final buffer = StringBuffer();
-  final className = colorsConfig.outputs.className;
   buffer.writeln(header);
-  buffer.writeln(ignore);
   buffer.writeln("import 'package:flutter/painting.dart';");
   buffer.writeln("import 'package:flutter/material.dart';");
   buffer.writeln();
-  buffer.writeln('class $className {');
-  buffer.writeln('$className._();');
+  buffer.writeln('class ColorName {');
+  buffer.writeln('  ColorName._();');
   buffer.writeln();
 
   final colorList = <_Color>[];
-  colorsConfig.inputs
+  colors.inputs
       .map((file) => ColorPath(join(pubspecFile.parent.path, file)))
       .forEach((colorFile) {
     final data = colorFile.file.readAsStringSync();
@@ -62,9 +60,8 @@ String _colorStatement(_Color color) {
   final buffer = StringBuffer();
   if (color.isMaterial) {
     final swatch = swatchFromPrimaryHex(color.hex);
-    final statement = '''/// MaterialColor: 
-        ${swatch.entries.map((e) => '///   ${e.key}: ${hexFromColor(e.value)}').join('\n')}
-        static const MaterialColor ${color.name.camelCase()} = MaterialColor(
+    final statement = '''
+  static const MaterialColor ${color.name.camelCase()} = MaterialColor(
     ${swatch[500]},
     <int, Color>{
       ${swatch.entries.map((e) => '${e.key}: Color(${e.value}),').join('\n')}
@@ -74,9 +71,8 @@ String _colorStatement(_Color color) {
   }
   if (color.isMaterialAccent) {
     final accentSwatch = accentSwatchFromPrimaryHex(color.hex);
-    final statement = '''/// MaterialAccentColor: 
-        ${accentSwatch.entries.map((e) => '///   ${e.key}: ${hexFromColor(e.value)}').join('\n')}
-        static const MaterialAccentColor ${color.name.camelCase()}Accent = MaterialAccentColor(
+    final statement = '''
+  static const MaterialAccentColor ${color.name.camelCase()}Accent = MaterialAccentColor(
    ${accentSwatch[200]},
    <int, Color>{
      ${accentSwatch.entries.map((e) => '${e.key}: Color(${e.value}),').join('\n')}
@@ -85,11 +81,8 @@ String _colorStatement(_Color color) {
     buffer.writeln(statement);
   }
   if (color.isNormal) {
-    final comment = '/// Color: ${color.hex}';
     final statement =
         '''static const Color ${color.name.camelCase()} = Color(${colorFromHex(color.hex)});''';
-
-    buffer.writeln(comment);
     buffer.writeln(statement);
   }
   return buffer.toString();
